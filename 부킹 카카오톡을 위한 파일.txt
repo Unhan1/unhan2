@@ -1,0 +1,9 @@
+c7151035e2f8c15d29dba61390d12bc4
+
+
+
+먼저 1을 인터넷에 치고,
+1. https://kauth.kakao.com/oauth/authorize?client_id=c7151035e2f8c15d29dba61390d12bc4&redirect_uri=https://example.com/oauth&response_type=code
+
+2.를 쳐셔 나온 code= 이후의 값을
+https://example.com/oauth?code=vDBX0ACRSFb9o8GMoCm49sk7wkeTf1Wq1qTvH4auir7ciyHOnMvlIpQQuPMKKwzUAAABi1c9Q1y37mS5Kc-sjw

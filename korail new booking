@@ -1,0 +1,94 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
+from selenium.common.exceptions import NoSuchElementException
+import time
+import subprocess
+
+# 드라이버 초기화
+driver = webdriver.Chrome()
+
+# 코레일 웹사이트 로그인 페이지 접속
+driver.get("https://www.letskorail.com/korail/com/login.do")
+driver.implicitly_wait(10) # 페이지 다 뜰 때 까지 기다림
+
+driver.find_element(By.ID, 'txtMember').send_keys('1170544381') # 회원번호
+driver.find_element(By.ID, 'txtPwd').send_keys("h70507050%") # 비밀번호
+
+driver.find_element(By.XPATH, '//*[@id="loginDisplay1"]/ul/li[3]/a/img').click()
+
+time.sleep(5)
+
+driver.get('https://www.letskorail.com/ebizprd/EbizPrdTicketpr21100W_pr21110.do')
+
+# 출발지 입력
+dep_stn = driver.find_element(By.ID, 'start')
+dep_stn.clear() 
+dep_stn.send_keys("대전")
+
+# 도착지 입력
+arr_stn = driver.find_element(By.ID, 'get')
+arr_stn.clear()
+arr_stn.send_keys("평택")
+
+
+
+# 출발 월
+elm_month = driver.find_element(By.ID, "s_month")
+driver.execute_script("arguments[0].setAttribute('style','display: True;')", elm_month)
+Select(driver.find_element(By.ID, "s_month")).select_by_visible_text("10")
+
+# 출발 일
+elm_day = driver.find_element(By.ID, "s_day")
+driver.execute_script("arguments[0].setAttribute('style','display: True;')", elm_day)
+Select(driver.find_element(By.ID, "s_day")).select_by_visible_text("23")
+
+# 출발 시간
+elm_hour = driver.find_element(By.ID, "s_hour")
+driver.execute_script("arguments[0].setAttribute('style','display: True;')", elm_hour)
+Select(driver.find_element(By.ID, "s_hour")).select_by_value("08")
+
+#조회하기 클릭
+driver.find_element(By.XPATH, '//*[@id="center"]/form/div/p/a/img').click()
+
+
+
+time.sleep(5)
+while True:
+    try:
+        # 페이지 새로고침
+        driver.refresh()
+        
+        for i in [1, 3, 5, 7]:  # 이 리스트에 있는 숫자를 순서대로 사용
+            try:
+                # XPath 문자열을 만들 때 f-string을 사용하여 td[{i}] 부분을 바꿉니다.
+                xpath = f'//*[@id="tableResult"]/tbody/tr[{i}]/td[6]/a[1]/img'
+                
+                # 요소 찾기 시도
+                button = driver.find_element(By.XPATH, xpath)
+                
+                # 요소를 찾았다면 클릭하고 루프 종료
+                button.click()
+
+                time.sleep(10)
+                subprocess.run(['python', 'katalk.py'])
+                time.sleep(10)
+                subprocess.run(['python', 'katalk2.py'])
+
+                break  # 클릭에 성공하면 내부 for 루프를 종료합니다.
+            except NoSuchElementException:
+                # 해당 인덱스에 요소가 없으면, 다음 인덱스로 넘어갑니다.
+                continue
+        
+        # 내부 for 루프를 모두 돌았는데도 클릭에 성공하지 못했다면,
+        # 일정 시간 동안 대기한 뒤 다시 시도
+        time.sleep(5)  # 5초 대기
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        break  # 예기치 못한 오류가 발생하면 외부 while 루프를 종료합니다.
+
+
+time.sleep(3600)
